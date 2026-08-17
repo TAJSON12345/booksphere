@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:16
+    container_name: booksphere_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: booksphere
+      POSTGRES_USER: booksphere_user
+      POSTGRES_PASSWORD: booksphere_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - booksphere_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  booksphere_postgres_data:
