@@ -18,15 +18,27 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY
 # ============================================================
 
-SECRET_KEY = "django-insecure-f7mrroqag_9h=%&_k!ap)6r5gve&amge)2+lp7%0zjz+r@5iw9"
+import os
 
-DEBUG = True
+SECRET_KEY = os.environ.get(
+    "DJANGO_SECRET_KEY",
+    "django-insecure-f7mrroqag_9h=%&_k!ap)6r5gve&amge)2+lp7%0zjz+r@5iw9"
+)
+
+DEBUG = os.environ.get("DEBUG", "True") == "True"
 
 ALLOWED_HOSTS = [
     "127.0.0.1",
     "localhost",
     ".app.github.dev",
 ]
+
+if os.environ.get("ALLOWED_HOSTS"):
+    ALLOWED_HOSTS += [
+        host.strip()
+        for host in os.environ["ALLOWED_HOSTS"].split(",")
+        if host.strip()
+    ]
 
 
 # ============================================================
@@ -63,7 +75,8 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
 
-    # CORS middleware must be near the top
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+
     "corsheaders.middleware.CorsMiddleware",
 
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -113,15 +126,16 @@ WSGI_APPLICATION = "config.wsgi.application"
 # DATABASE
 # ============================================================
 
+import dj_database_url
+
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "booksphere",
-        "USER": "booksphere_user",
-        "PASSWORD": "booksphere_password",
-        "HOST": "localhost",
-        "PORT": "5432",
-    }
+    "default": dj_database_url.config(
+        default=(
+            "postgresql://booksphere_user:"
+            "booksphere_password@localhost:5432/booksphere"
+        ),
+        conn_max_age=600,
+    )
 }
 
 
@@ -162,8 +176,8 @@ USE_TZ = True
 # STATIC FILES
 # ============================================================
 
-STATIC_URL = "static/"
-
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # ============================================================
 # EMAIL
@@ -181,7 +195,12 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
 ]
-
+if os.environ.get("CORS_ALLOWED_ORIGINS"):
+    CORS_ALLOWED_ORIGINS += [
+        origin.strip()
+        for origin in os.environ["CORS_ALLOWED_ORIGINS"].split(",")
+        if origin.strip()
+    ]
 # Allow cookies/session authentication to be sent
 # between React and Django.
 CORS_ALLOW_CREDENTIALS = True
@@ -195,7 +214,12 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
 ]
-
+if os.environ.get("CSRF_TRUSTED_ORIGINS"):
+    CSRF_TRUSTED_ORIGINS += [
+        origin.strip()
+        for origin in os.environ["CSRF_TRUSTED_ORIGINS"].split(",")
+        if origin.strip()
+    ]
 
 # ============================================================
 # SESSION / CSRF COOKIES
