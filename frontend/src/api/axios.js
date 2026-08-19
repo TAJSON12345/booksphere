@@ -2,7 +2,7 @@ import axios from "axios";
 
 const api = axios.create({
     baseURL:
-        "https://didactic-fortnight-x47jvxv4vrpfv56r-8000.app.github.dev/api/",
+        "http://localhost:8000/api/",
     withCredentials: true,
 });
 
